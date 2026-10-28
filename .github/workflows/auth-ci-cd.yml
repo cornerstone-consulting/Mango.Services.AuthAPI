@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/hanna
+      - feature/*
   pull_request:
     branches:
       - main
@@ -37,14 +37,14 @@ jobs:
       # Authenticate normal .NET restore to GitHub Packages
       - name: Add GitHub Packages source
         env:
-          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           dotnet nuget add source \
             --username "${{ github.actor }}" \
             --password "$GH_PACKAGES_TOKEN" \
             --store-password-in-clear-text \
             --name github \
-            "https://nuget.pkg.github.com/MdKasimS-CCG/index.json"
+            "https://nuget.pkg.github.com/cornerstone-consulting/index.json"
 
       - name: Restore dependencies
         run: dotnet restore Mango.Services.AuthAPI.csproj
@@ -58,7 +58,7 @@ jobs:
       # Create temporary NuGet config for Docker
       - name: Create NuGet config
         env:
-          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat > ./NuGet.Config <<EOF
           <?xml version="1.0" encoding="utf-8"?>
@@ -66,7 +66,7 @@ jobs:
             <packageSources>
               <clear />
               <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-              <add key="github" value="https://nuget.pkg.github.com/MdKasimS-CCG/index.json" />
+              <add key="github" value="https://nuget.pkg.github.com/cornerstone-consulting/index.json" />
             </packageSources>
             <packageSourceCredentials>
               <github>
@@ -102,8 +102,8 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # GHCR uses the lowercase organization name for container image paths.
-          docker tag mango-authapi:latest ghcr.io/mdkasims-ccg/mango-authapi:latest
-          docker push ghcr.io/mdkasims-ccg/mango-authapi:latest
+          docker tag mango-authapi:latest ghcr.io/cornerstone-consulting/mango-authapi:latest
+          docker push ghcr.io/cornerstone-consulting/mango-authapi:latest
 
       # Remove temporary credentials file
       - name: Remove NuGet config
